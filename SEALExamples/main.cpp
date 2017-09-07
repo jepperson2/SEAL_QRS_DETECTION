@@ -131,7 +131,7 @@ void example_basics()
     IntegerEncoder:
     Given an integer base b, encodes integers as plaintext polynomials in the following way. First, a base-b
     expansion of the integer is computed. This expansion uses a "balanced" set of representatives of integers
-    modulo b as the coefficients. Namely, when b is off the coefficients are integers between -(b-1)/2 and
+    modulo b as the coefficients. Namely, when b is odd the coefficients are integers between -(b-1)/2 and
     (b-1)/2. When b is even, the integers are between -b/2 and (b-1)/2, except when b is two and the usual
     binary expansion is used (coefficients 0 and 1). Decoding amounts to evaluating the polynomial at x=b.
     For example, if b=2, the integer 26 = 2^4 + 2^3 + 2^1 is encoded as the polynomial 1x^4 + 1x^3 + 1x^1.

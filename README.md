@@ -8,6 +8,8 @@ ECG data taken from MIT-BIH Arrhythmia Database: https://physionet.org/physioban
 
 I chose SEAL because of it's ability to handle Franctional Encoding and it's speed when the plaintext modulus p = 2. 
 
+You can find SEAL (Simple Encrypted Arithmetic Library) at: http://sealcrypto.codeplex.com/
+
 I chose p = 2 because Wang et al.'s algorithm uses a series of comparisons, which can be implemented homomorphically by being built up using bitwise operators (XOR, AND, etc).
 
 Let me know if you have any questions or want to contribute to this project! 

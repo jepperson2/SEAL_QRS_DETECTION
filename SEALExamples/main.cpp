@@ -357,7 +357,7 @@ void example_parameter_selection()
     
     /*
     First create a ChooserPoly representing the input data. You can think of this modeling a freshly
-    encrypted cipheretext of a plaintext polynomial with length at most 10 coefficients, where the
+    encrypted ciphertext of a plaintext polynomial with length at most 10 coefficients, where the
     coefficients have absolute value at most 1.
     */
     ChooserPoly cinput(10, 1);

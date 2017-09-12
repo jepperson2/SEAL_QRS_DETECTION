@@ -5,8 +5,8 @@ DUALSLOPE::DUALSLOPE(vector<double> inputs, int sampling_frequency, bool dbg){
     fs = sampling_frequency;
     debug = dbg;
 
-    initialize();
     set_parms();
+    initialize();
 }
 
 const string DUALSLOPE::className(){
@@ -33,44 +33,6 @@ Errors DUALSLOPE::test(){
     return e;
 }
 
-void DUALSLOPE::initialize(){
-    if (debug){
-        cout << className() << ": Initializing..." << endl;
-    }
-    double double_a = 0.027 * fs;   // 0.027 set as in Wang's original paper
-    a = round(double_a);
-    double double_b = 0.063 * fs;   // 0.063 set as in Wang's original paper
-    b = round(double_b);
-    
-    n_samples = (2 * b) + 1;        // Number of samples considered in one pass of the algorithm (goes from 0 to -2b)
-    lr_size = (b - a) + 1;              // convenience for looping through each side 
-
-    // Constant values of 1/a, 1/(a+1), ... , 1/b. These are the values of the "run" in the rise over run calculation of slope
-    double width;
-    double rounded_width;
-
-    for (double i = a; i < (b + 1); i++){
-        width = 1/i;
-        rounded_width = round(100000 * width)/100000;
-
-        sample_difference_widths.push_back(rounded_width);
-    }
-
-    avg_height = 0.0; // Set initial height to 0. 
-    he.debug_on(debug);
-    extern MemoryPoolHandle pool;
-
-    if (debug){
-        cout << "a,b = " << a << "," << b << endl;
-        cout << "n_samples = " << n_samples << endl;
-        cout << "lr_size = " << lr_size << endl;
-
-        for (int i = 0; i < lr_size; i++){
-            cout << "sample_difference_widths[" << i << "]: " << sample_difference_widths[i] << endl;
-        }
-    }
-}
-
 void DUALSLOPE::set_parms(){
     if (debug){
         cout << "setting parms..." << endl;
@@ -84,6 +46,49 @@ void DUALSLOPE::set_parms(){
         cout << "parms.poly_modulus(): " << parms.poly_modulus().to_string() << endl;
         cout << "parms.coeff_modulus(): " << parms.coeff_modulus().to_string() << endl;
         cout << "parms.plain_modulus(): " << parms.plain_modulus().to_string() << endl;
+    }
+}
+
+void DUALSLOPE::initialize(){
+    if (debug){
+        cout << className() << ": Initializing..." << endl;
+    }
+
+    double double_a = 0.027 * fs;   // 0.027 set as in Wang's paper, an estimate of the min width of QRS complex
+    a = round(double_a);
+    double double_b = 0.063 * fs;   // 0.063 set as in Wang's paper, an estimate of the max width of QRS complex
+    b = round(double_b);
+    
+    n_samples = (2 * b) + 1;        // number of samples considered in one iteration (goes from 0 to -2b)
+    lr_size = (b - a) + 1;          // convenience for looping through each side 
+
+    diff_threshold = 3840 / fs;     // initial diff_threshold value. to be updated later based on S_ave
+    min_threshold = 1536 / fs;      // threshold value given in paper
+    avg_height = 0.0;               // set average height to 0. to be updated later based on sample heights
+
+    // Constant values of 1/a, 1/(a+1), ... , 1/b. These are the values of the "run" in the rise over run calculation of slope
+    double width;
+    double rounded_width;
+
+    for (double i = a; i < (b + 1); i++){
+        width = 1/i;
+        rounded_width = round(100000 * width)/100000;
+
+        sample_difference_widths.push_back(rounded_width);
+    }
+
+    he.debug_on(debug);
+    cout << "he debug status: " << he.debug << endl;
+    extern MemoryPoolHandle pool;
+
+    if (debug){
+        cout << "a,b = " << a << "," << b << endl;
+        cout << "n_samples = " << n_samples << endl;
+        cout << "lr_size = " << lr_size << endl;
+
+        for (int i = 0; i < lr_size; i++){
+            cout << "sample_difference_widths[" << i << "]: " << sample_difference_widths[i] << endl;
+        }
     }
 }
 

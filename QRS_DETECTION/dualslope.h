@@ -24,14 +24,14 @@ class DUALSLOPE{
         HE he;
         Timing t;
 
+        int fs;                 // Sampling Frequency
+        vector<double> samples;
+        vector<double> sample_difference_widths;
+
         int a;                  // minimum distance away from considered sample = 0.027*fs
         int b;                  // maximum distance away from considered sample = 0.063*fs
         int n_samples;          // number of samples processed at one time
         int lr_size;            // size of "window" of values being compared to considered sample
-
-        int fs;                 // Sampling Frequency
-        vector<double> samples;
-        vector<double> sample_difference_widths;
 
         double diff_threshold;  // Theta_diff
         double min_threshold;   // Theta_min

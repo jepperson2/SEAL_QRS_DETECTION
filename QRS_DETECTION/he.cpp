@@ -1,13 +1,15 @@
 #include "he.h"
 
-HE::HE(){}
+HE::HE(){
+    
+}
 
 const string HE::className(){
 	return "HE";
 }
 
-void HE::debug_on(bool on){
-	debug = on;
+void HE::debug_on(bool dbg){
+	debug = dbg;
 }
 
 //CLIENT SIDE

@@ -8,7 +8,6 @@ using namespace seal;
 
 class HE{
     private:
-        bool debug;
         const string className();
 
         //SERVER SIDE
@@ -22,6 +21,7 @@ class HE{
 //        Decryptor decryptor; 
 
     public:
+        bool debug = false;
 //        HE(EncryptionParameters parms);
         HE();
         void debug_on(bool on);

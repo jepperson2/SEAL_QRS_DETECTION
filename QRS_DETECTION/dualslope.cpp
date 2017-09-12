@@ -28,12 +28,14 @@ void DUALSLOPE::t_end(string name){
 Errors DUALSLOPE::test(){
     Errors e("DUALSLOPE");
     e.add("Find QRS", test_find_qrs());
-    e.add("Find QRS between a and b", test_find_qrs(5,124));
+    e.add("Find QRS between a and b", test_find_qrs(5,51));
     return e;
 }
 
 void DUALSLOPE::set_parms(){
-    cout << "setting parms..." << endl;
+    if (debug){
+        cout << "setting parms..." << endl;
+    }
     parms.set_poly_modulus("1x^2048 + 1");
     parms.set_coeff_modulus(ChooserEvaluator::default_parameter_options().at(2048));
     parms.set_plain_modulus(1 << 8);
@@ -47,8 +49,9 @@ void DUALSLOPE::set_parms(){
 }
 
 void DUALSLOPE::initialize(){
-    cout << className() << ": Initializing..." << endl;
-
+    if (debug){
+        cout << className() << ": Initializing..." << endl;
+    }
     N_samples = 47; // Set number given that fs = 360 samples/sec for MIT-BIH database.
     avg_height = 0.0; // Set initial height to 0. 
     he.debug_on(debug);
@@ -131,8 +134,9 @@ vector<Ciphertext> DUALSLOPE::find_qrs(int index_a, int index_b){
 }
    
 void DUALSLOPE::calculate_lr_slopes(){
-   	print_banner("Calculate LR Slopes");
-
+   	if (debug){
+        print_banner("Calculate LR Slopes");
+    }
  /*   // Create encryption parameters
     EncryptionParameters parms; 
     parms.set_poly_modulus("1x^2048 + 1");
@@ -141,10 +145,14 @@ void DUALSLOPE::calculate_lr_slopes(){
     parms.validate();*/
 
     // Generate keys
-    cout << "Generating keys ..." << endl;
+    if (debug){
+        cout << "Generating keys ..." << endl;
+    }
     KeyGenerator generator(parms);
     generator.generate();
-    cout << "... key generation complete." << endl;
+    if (debug){
+        cout << "... key generation complete." << endl;
+    }
     Ciphertext public_key = generator.public_key();
     Plaintext secret_key = generator.secret_key();
 
@@ -161,23 +169,35 @@ void DUALSLOPE::calculate_lr_slopes(){
     Evaluator evaluator(parms);
     Decryptor decryptor(parms, secret_key);
 
+    // Debugging - print out samples and sample_difference_widths
+    if (debug){
+        cout << "Printing samples ..." << endl;
+        for (int i = 0; i < N_samples; i++){
+            cout << to_string(samples[i]).substr(0,6) << ((i != (N_samples - 1)) ? ", " : ".\n");
+        }
+        cout << endl << "Printing sample_difference_widths ..." << endl;
+        for (int i = 0; i < 14; i++){
+            cout << to_string(sample_difference_widths[i]).substr(0,7) << ((i != 13) ? ", " : ".\n");
+        }
+    }
+
     // First encrypt the samples
-    cout << "Encrypting ..." << endl;
+    if (debug){
+        cout << "Encrypting samples ..." << endl;
+    }
     vector<Ciphertext> encrypted_samples;
-    for (int i = 0; i < 47; i++)
-    {   
+    for (int i = 0; i < N_samples; i++){   
         Plaintext encoded_number = encoder.encode(samples[i]);
         encrypted_samples.emplace_back(encryptor.encrypt(encoded_number));
-        cout << to_string(samples[i]).substr(0,6) << ((i != 46) ? ", " : ".\n");
     }
 
     // Next we encode the sample_difference_widths. There is no reason to encrypt these since they are not private data. 
-	cout << "Encoding ... ";
+    if (debug){
+        cout << "Encoding ... " << endl;
+    }
     vector<Plaintext> encoded_sample_widths;
-    for (int i = 0; i < 14; i++)
-    {
+    for (int i = 0; i < 14; i++){
         encoded_sample_widths.emplace_back(encoder.encode(sample_difference_widths[i]));
-        cout << to_string(sample_difference_widths[i]).substr(0,7) << ((i != 13) ? ", " : ".\n");
     }
 
     /* 
@@ -185,40 +205,50 @@ void DUALSLOPE::calculate_lr_slopes(){
     also calculate the slopes between sample z=-23 and samples z=-33...-46 to calculate SR min/max 
     */
 
-    cout << "Computing slopes for SL ... " << endl;
+    if (debug){
+        cout << "Computing slopes for SL ... " << endl;
+    }
+
     vector<Ciphertext> encrypted_SL_slopes;
     vector<double> unencrypted_SL_slopes(14);
 
-    for (int i = 0; i < 14; i++)
-    {
+    for (int i = 0; i < 14; i++){
         // Offset because 0th sample is actually most recent = encrypted_samples[46], sample 23 = mid point
         Ciphertext volt_diff = evaluator.sub(encrypted_samples[23], encrypted_samples[i+33]);
 
         // We use multiply_plain instead of multiply because sample widths aren't encrypted. Less noise growth.
         encrypted_SL_slopes.emplace_back(evaluator.multiply_plain(volt_diff, encoded_sample_widths[i]));
-
-        double res = samples[23] - samples[i+33];
-        res *= sample_difference_widths[i];
-        unencrypted_SL_slopes[i] = res;
-        cout << "unencrypted_SL_slopes[" << i << "]: " << unencrypted_SL_slopes[i] << endl;
+    }
+    if (debug){
+        for (int i = 0; i < 14; i++){
+            double res = samples[23] - samples[i+33];
+            res *= sample_difference_widths[i];
+            unencrypted_SL_slopes[i] = res;
+            cout << "unencrypted_SL_slopes[" << i << "]: " << unencrypted_SL_slopes[i] << endl;
+        }
     }
 
-    cout << "Computing slopes for SR ... " << endl;
+    if (debug){
+        cout << "Computing slopes for SR ... " << endl;
+    }
+
     vector<Ciphertext> encrypted_SR_slopes;
     vector<double> unencrypted_SR_slopes(14);
 
-    for (int i = 0; i < 14; i++)
-    {
+    for (int i = 0; i < 14; i++){
         // Offset because 0th sample is actually most recent = encrypted_samples[46], sample 23 = mid point
         Ciphertext volt_diff = evaluator.sub(encrypted_samples[23], encrypted_samples[13-i]);
 
         // We use multiply_plain instead of multiply because sample widths aren't encrypted. Less noise growth.
         encrypted_SR_slopes.emplace_back(evaluator.multiply_plain(volt_diff, encoded_sample_widths[i]));
-
-        double res = samples[23] - samples[13-i];
-        res *= sample_difference_widths[i];
-        unencrypted_SR_slopes[i] = res;
-        cout << "unencrypted_SR_slopes[" << i << "]: " << unencrypted_SR_slopes[i] << endl;
+    }
+    if (debug){
+        for (int i = 0; i < 14; i++){
+            double res = samples[23] - samples[13-i];
+            res *= sample_difference_widths[i];
+            unencrypted_SR_slopes[i] = res;
+            cout << "unencrypted_SR_slopes[" << i << "]: " << unencrypted_SR_slopes[i] << endl;
+        }
     }
 
 	/***************************Practicing decryption/decoding; it works!***************************
@@ -240,18 +270,27 @@ void DUALSLOPE::calculate_lr_slopes(){
         SR_slopes[i] = encoder.decode(plain_SR_slopes[i]);
         cout << "SL_slopes[" << i << "], SR_slopes[" << i << "]: " << SL_slopes[i] << ", " << SR_slopes[i] << endl;
     }
-*/
-	cout << "we got to the end of slope calculations!" << endl;
+    */
+
+    if (debug){
+	    cout << "we got to the end of slope calculations!" << endl;
+    }
 }
 
 void DUALSLOPE::calculate_lr_minmax(){
-    cout << "You're in calculate_lr_minmax()!" << endl;
+    if (debug){
+        print_banner("Calculating LR Min/Max");
+    }
 }
 
 void DUALSLOPE::compare_slopes2thresholds(){
-    cout << "You're in compare_slopes2thresholds()!" << endl;
+    if (debug){
+        print_banner("Comparing Slopes to Thresholds");
+    }
 }
 
 void DUALSLOPE::verify_peak(){
-    cout << "You're in verify_peak()!" << endl;
+    if (debug){
+        print_banner("Verifying Peaks");
+    }
 }

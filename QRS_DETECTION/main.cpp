@@ -24,7 +24,9 @@ int main()
     t_all.start();
     Errors e("testing");
     
-    print_banner("We bout to run the test, y'all!");
+    if (debug){ 
+        print_banner("We bout to run the test, y'all!");
+    }
 
     // Create and run DUALSLOPE algorithm
     DUALSLOPE ds = DUALSLOPE(ecg_voltages, thresholds, debug);

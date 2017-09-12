@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <math.h>
 #include "seal.h"
 #include "he.h"
 #include "helper_functions.h"
@@ -14,24 +15,30 @@ using namespace seal::util;
 
 class DUALSLOPE{
     public:
-        DUALSLOPE(vector<double> inputs, vector<double> given_thresholds, bool dbg);
+        DUALSLOPE(vector<double> inputs, int sampling_frequency, bool dbg);
         Errors test();
 
     private:
         const string className();
         bool debug;
-        unsigned N_samples;
         HE he;
         Timing t;
 
-        EncryptionParameters parms;
-        MemoryPoolHandle pool = MemoryPoolHandle::acquire_new();
+        int a;                  // minimum distance away from considered sample = 0.027*fs
+        int b;                  // maximum distance away from considered sample = 0.063*fs
+        int n_samples;          // number of samples processed at one time
+        int lr_size;            // size of "window" of values being compared to considered sample
 
+        int fs;                 // Sampling Frequency
         vector<double> samples;
-        vector<double> thresholds;
         vector<double> sample_difference_widths;
 
-        double avg_height;
+        double diff_threshold;  // Theta_diff
+        double min_threshold;   // Theta_min
+        double avg_height;      // H_ave
+
+        EncryptionParameters parms;
+        MemoryPoolHandle pool = MemoryPoolHandle::acquire_new();
 
         void set_parms();
         void initialize();

@@ -26,6 +26,45 @@ void print_banner(string title){
     }
 }
 
+vector<double> get_samples_from_file(string filename, int channel, bool debug){
+        
+    ifstream infile(filename);
+
+    string file_heading, file_units;
+
+    vector<int> sample_numbers;
+    vector<double> channel_1_values;
+    vector<double> channel_2_values;
+
+    int tmp_samp_num;
+    double tmp_chan_1_val;
+    double tmp_chan_2_val;
+
+    getline(infile, file_heading);
+    getline(infile, file_units);
+
+    while (infile >> tmp_samp_num >> tmp_chan_1_val >> tmp_chan_2_val){
+        sample_numbers.push_back(tmp_samp_num);
+        channel_1_values.push_back(tmp_chan_1_val);
+        channel_2_values.push_back(tmp_chan_2_val);
+    }   
+        
+    if (debug){
+        cout << file_heading << endl;
+        cout << file_units << endl;
+
+        for (int i = 0; i < sample_numbers.size(); i++){
+            cout << sample_numbers[i] << "\t\t" << channel_1_values[i] << "\t" << channel_2_values[i] << endl;
+        }   
+    }   
+
+    if (channel == 1){ 
+        return channel_1_values;
+    } else {
+        return channel_2_values;
+    }   
+}
+
 Errors::Errors(string t){
     title = t;
 }

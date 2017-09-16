@@ -4,6 +4,7 @@
 #include <stdlib.h> //rand
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <ctime>
 
 using namespace std;
@@ -12,6 +13,7 @@ typedef string mkt; // Map Key Type - Key to access a ciphertext in the map
 string generate_string(int length);
 
 void print_banner(string title);
+vector<double> get_samples_from_file(string filename, int channel, bool debug);
 
 class Timing{
         public:

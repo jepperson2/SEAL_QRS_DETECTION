@@ -54,9 +54,9 @@ void DUALSLOPE::initialize(){
         cout << className() << ": Initializing..." << endl;
     }
 
-    double double_a = 0.027 * fs;   // 0.027 set as in Wang's paper, an estimate of the min width of QRS complex
+    double double_a = 0.027 * fs;   // set as in Wang's paper, an estimate of the min width of QRS complex
     a = round(double_a);
-    double double_b = 0.063 * fs;   // 0.063 set as in Wang's paper, an estimate of the max width of QRS complex
+    double double_b = 0.063 * fs;   // set as in Wang's paper, an estimate of the max width of QRS complex
     b = round(double_b);
     
     n_samples = (2 * b) + 1;        // number of samples considered in one iteration (goes from 0 to -2b)
@@ -78,7 +78,6 @@ void DUALSLOPE::initialize(){
     }
 
     he.debug_on(debug);
-    cout << "he debug status: " << he.debug << endl;
     extern MemoryPoolHandle pool;
 
     if (debug){
@@ -275,7 +274,7 @@ void DUALSLOPE::calculate_lr_slopes(){
         }
     }
 
-	/***************************Practicing decryption/decoding; it works!***************************
+	//***************************Practicing decryption/decoding; it works!***************************
 
     vector<Plaintext> plain_SL_slopes;
     vector<Plaintext> plain_SR_slopes;
@@ -283,8 +282,7 @@ void DUALSLOPE::calculate_lr_slopes(){
     vector<double> SL_slopes(lr_size);
     vector<double> SR_slopes(lr_size);
 
-    for (int i = 0; i < lr_size; i++)
-    {
+    for (int i = 0; i < lr_size; i++){
         // Decrypt
         plain_SL_slopes.emplace_back(decryptor.decrypt(encrypted_SL_slopes[i]));
         plain_SR_slopes.emplace_back(decryptor.decrypt(encrypted_SR_slopes[i]));
@@ -292,9 +290,14 @@ void DUALSLOPE::calculate_lr_slopes(){
         // Decode
         SL_slopes[i] = encoder.decode(plain_SL_slopes[i]);
         SR_slopes[i] = encoder.decode(plain_SR_slopes[i]);
-        cout << "SL_slopes[" << i << "], SR_slopes[" << i << "]: " << SL_slopes[i] << ", " << SR_slopes[i] << endl;
     }
-    */
+    
+    if (debug){
+        cout << "Printing Decrypted and Decoded values of SL and SR slopes ..." << endl;
+        for (int i = 0; i < lr_size; i++){
+            cout << "SL_slopes[" << i << "], SR_slopes[" << i << "]: " << SL_slopes[i] << ", " << SR_slopes[i] << endl;
+        }
+    }
 
     if (debug){
 	    cout << "we got to the end of slope calculations!" << endl;

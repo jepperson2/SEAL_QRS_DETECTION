@@ -50,7 +50,7 @@ class DUALSLOPE{
 
         void calculate_lr_slopes();
         void calculate_lr_minmax();
-        void compare_slopes2thresholds();
+        void compare_slopes_to_thresholds();
         void verify_peak();
 
         bool test_find_qrs();

@@ -76,8 +76,9 @@ void DUALSLOPE::initialize(){
 
         sample_difference_widths.push_back(rounded_width);
     }
-
+    he = HE(parms);
     he.debug_on(debug);
+
     extern MemoryPoolHandle pool;
 
     if (debug){
@@ -182,10 +183,10 @@ void DUALSLOPE::calculate_lr_slopes(){
     /* 
      Create fractional encoder. Here using 64 coefficients of the polynomial for the 
      integral part (low-degree terms) and expand the fractional part to 32 terms of 
-     precision (base 3) (high-degree terms).
+     precision (base 2) (high-degree terms).
     */
 
-    FractionalEncoder encoder(parms.plain_modulus(), parms.poly_modulus(), 64, 32, 3);
+    FractionalEncoder encoder(parms.plain_modulus(), parms.poly_modulus(), 64, 32, 2);
 
     // Create the rest of the tools
     Encryptor encryptor(parms, public_key);
@@ -310,7 +311,7 @@ void DUALSLOPE::calculate_lr_minmax(){
     }
 }
 
-void DUALSLOPE::compare_slopes2thresholds(){
+void DUALSLOPE::compare_slopes_to_thresholds(){
     if (debug){
         print_banner("Comparing Slopes to Thresholds");
     }

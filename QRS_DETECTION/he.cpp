@@ -1,7 +1,9 @@
 #include "he.h"
 
-HE::HE(){
-    
+HE::HE(){}
+
+HE::HE(EncryptionParameters parms){
+    setup(parms);
 }
 
 const string HE::className(){

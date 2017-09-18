@@ -21,10 +21,10 @@ class HE{
 //        Decryptor decryptor; 
 
     public:
-        bool debug = false;
-//        HE(EncryptionParameters parms);
+        bool debug;
         HE();
-        void debug_on(bool on);
+        HE(EncryptionParameters parms);
+        void debug_on(bool dbg);
 
 /*        Evaluator evaluator; 
         FractionalEncoder encoder;

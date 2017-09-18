@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <fstream>
 #include "dualslope.h"
 
 using namespace std;
@@ -15,7 +14,7 @@ int main()
     
     bool debug = false;
 
-    vector<double> samples = get_samples_from_file("MIT_BIH_Records/100_1s.txt", 1, debug);
+    vector<double> samples = get_samples_from_file("MIT_BIH_Records/100_1s.txt", 2, debug);
 
     if (debug){ 
         print_banner("We bout to run the test, y'all!");
